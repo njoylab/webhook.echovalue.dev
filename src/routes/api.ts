@@ -47,6 +47,11 @@ api.get("/api/sessions/:id/stream", (c) => {
     return c.json({ error: "Session not found" }, 404);
   }
 
+  // Disable proxy buffering so SSE events are flushed immediately
+  c.header("Cache-Control", "no-cache, no-transform");
+  c.header("X-Accel-Buffering", "no");
+  c.header("Connection", "keep-alive");
+
   return streamSSE(c, async (stream) => {
     // Send existing requests first
     for (const req of session.requests) {
