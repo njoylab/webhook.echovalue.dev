@@ -131,28 +131,6 @@ Health check endpoint for load balancers and container orchestrators.
 |---|---|---|
 | `PORT` | `3000` | HTTP port to listen on |
 
-## Deploy on Coolify
-
-1. Push this repo to a Git provider (GitHub, GitLab, etc.)
-2. In Coolify: **New Resource → Docker → Git Repository**
-3. Set build method to **Dockerfile**
-4. Add your domain (e.g. `echovalue.dev`)
-5. Coolify handles SSL via Let's Encrypt and reverse proxy via Traefik automatically
-6. Point your DNS A record to the Coolify server IP
-
-## Self-hosting with Docker Compose
-
-```yaml
-services:
-  echovalue:
-    build: .
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
-    environment:
-      PORT: 3000
-```
-
 ## License
 
 MIT
