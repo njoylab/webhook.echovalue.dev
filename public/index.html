@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="/public/favicon-64.png">
+
+  <title>EchoValue — Free Webhook Testing & Inspection Tool</title>
+  <meta name="description"
+    content="Test and debug webhooks instantly. Get a unique URL, send any HTTP request, and see headers, body, and query params in real-time. No signup required.">
+  <meta name="keywords"
+    content="webhook testing, webhook inspector, webhook debugger, http request capture, webhook relay, free webhook tool">
+  <link rel="canonical" href="https://webhook.echovalue.dev/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://webhook.echovalue.dev/">
+  <meta property="og:title" content="EchoValue — Free Webhook Testing & Inspection Tool">
+  <meta property="og:description"
+    content="Get a unique webhook URL and inspect any HTTP request in real-time. No signup, no setup. Built for developers.">
+  <meta property="og:site_name" content="EchoValue.dev Webhook">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="EchoValue — Free Webhook Testing">
+  <meta name="twitter:description"
+    content="Instant webhook inspection. Unique URL, real-time request capture, no signup.">
+
+  <link rel="stylesheet" href="/public/styles.css">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "EchoValue Webhook Inspector",
+    "url": "https://webhook.echovalue.dev",
+    "description": "Free webhook testing and inspection tool. Generate a unique URL and capture any HTTP request in real-time.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Organization", "name": "nJoyLab", "url": "https://njoylab.com" }
+  }
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <!-- Static content for SEO crawlers — replaced by app.js at runtime -->
+    <div class="landing">
+      <h1>echo<span>value</span></h1>
+      <p>Free webhook testing &amp; inspection tool. Get a unique URL, send any HTTP request, and see headers, body, and
+        query params in real-time. No signup required.</p>
+
+      <ul style="display:none">
+        <li>Capture GET, POST, PUT, PATCH, DELETE and any HTTP method</li>
+        <li>Inspect headers, body, query parameters, and IP address</li>
+        <li>Real-time updates via Server-Sent Events — no polling</li>
+        <li>JSON bodies are automatically pretty-printed</li>
+        <li>Sessions auto-expire after 24 hours — no data stored on disk</li>
+        <li>Open source — built by nJoyLab.com</li>
+      </ul>
+    </div>
+  </div>
+  <script src="/public/app.js"></script>
+</body>
+
+</html>
