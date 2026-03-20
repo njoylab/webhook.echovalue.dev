@@ -139,7 +139,7 @@
 
     eventSource.addEventListener("open", () => {
       statusDot.classList.remove("disconnected");
-      statusText.textContent = "Connected - listening for requests";
+      statusText.textContent = "Waiting for data...";
     });
   }
 
