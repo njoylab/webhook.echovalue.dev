@@ -115,6 +115,10 @@
                   <span class="sidebar-count" id="request-count">0</span>
                 </h2>
                 <div class="sidebar-actions">
+                  <button class="btn-new-session" id="clear-btn" title="Clear history">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Clear
+                  </button>
                   <a href="/" class="btn-new-session" title="Create new session">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     New
@@ -204,6 +208,29 @@
     document.getElementById("close-info-btn")?.addEventListener("click", () => {
       const collapsible = document.getElementById("detail-info-collapsible");
       if (collapsible) collapsible.style.display = "none";
+    });
+
+    // Clear history button
+    document.getElementById("clear-btn").addEventListener("click", () => {
+      requests = [];
+      selectedId = null;
+      hasReceivedFirstRequest = false;
+
+      // Reset sidebar
+      const list = document.getElementById("request-list-sidebar");
+      list.innerHTML = `
+        <div class="sidebar-empty" id="sidebar-empty">
+          <div class="sidebar-empty-icon">&#9678;</div>
+          <p>Waiting for requests...</p>
+        </div>
+      `;
+      document.getElementById("request-count").textContent = "0";
+
+      // Reset detail panel to empty state
+      document.getElementById("detail-empty-content").style.display = "block";
+      document.getElementById("detail-request-content").style.display = "none";
+      document.getElementById("detail-request-content").innerHTML = "";
+      document.getElementById("detail-info-collapsible").style.display = "none";
     });
 
     // SSE connection
