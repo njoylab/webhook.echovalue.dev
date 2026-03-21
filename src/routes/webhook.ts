@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { addRequest, getSession } from "../store.js";
 
+const MAX_BODY_SIZE = 1024 * 1024; // 1MB — reject oversized bodies before reading
+
 const webhook = new Hono();
 
 webhook.all("/w/:id", async (c) => {
@@ -25,6 +27,12 @@ webhook.all("/w/:id", async (c) => {
   });
 
   // Capture body (raw text, regardless of content type)
+  // Check Content-Length header first to reject oversized bodies early
+  const contentLength = c.req.header("content-length");
+  if (contentLength && Number.parseInt(contentLength, 10) > MAX_BODY_SIZE) {
+    return c.json({ error: "Body too large. Maximum size is 1 MB." }, 413);
+  }
+
   let body: string | null = null;
   if (c.req.method !== "GET" && c.req.method !== "HEAD") {
     try {
@@ -49,7 +57,7 @@ webhook.all("/w/:id", async (c) => {
     contentType,
     ip,
     path: url.pathname + url.search,
-    size: body ? body.length : 0,
+    size: body ? Buffer.byteLength(body, "utf8") : 0,
   });
 
   return c.json({ status: "ok", message: "Webhook received" });

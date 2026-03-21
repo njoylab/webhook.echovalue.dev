@@ -1,5 +1,5 @@
 // EchoValue - Client-side application
-(function () {
+(() => {
   const path = window.location.pathname;
   const app = document.getElementById("app");
 
@@ -35,15 +35,43 @@
       updateThemeBtn(btn);
     });
     document.body.appendChild(btn);
+
+    // React to OS theme changes (when no manual preference is set)
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+      if (!localStorage.getItem("theme")) {
+        applyTheme(getEffectiveTheme());
+        updateThemeBtn(btn);
+      }
+    });
   }
 
   initTheme();
 
   if (path.startsWith("/s/")) {
-    const sessionId = path.split("/s/")[1];
-    renderInspector(sessionId);
+    const sessionId = path.match(/\/s\/([^/]+)/)?.[1] || "";
+    validateAndRender(sessionId);
   } else {
     createAndRedirect();
+  }
+
+  async function validateAndRender(sessionId) {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}`);
+      if (res.status === 404) {
+        app.innerHTML = `
+          <div class="landing">
+            <h1 style="font-size:2rem">Session not found</h1>
+            <p style="color:var(--text-secondary)">This session may have expired or never existed. Sessions expire after 24 hours.</p>
+            <a href="/" class="btn" style="display:inline-block;margin-top:1rem;text-decoration:none">Create a new webhook</a>
+          </div>
+          ${renderFooter()}
+        `;
+        return;
+      }
+      renderInspector(sessionId);
+    } catch {
+      renderInspector(sessionId);
+    }
   }
 
   async function createAndRedirect() {
@@ -51,7 +79,7 @@
     try {
       const res = await fetch("/api/sessions", { method: "POST" });
       const data = await res.json();
-      window.location.replace("/s/" + data.id);
+      window.location.replace(`/s/${data.id}`);
     } catch {
       app.innerHTML = `<div class="landing"><p style="color:var(--text-secondary)">Failed to create session. <a href="/" style="color:var(--accent)">Retry</a></p></div>${renderFooter()}`;
     }
@@ -68,7 +96,7 @@
         <div class="inspector-header">
           <h2>Webhook Inspector</h2>
           <div class="webhook-url-box">
-            <span class="webhook-url" id="webhook-url">${webhookUrl}</span>
+            <span class="webhook-url" id="webhook-url">${escapeHtml(webhookUrl)}</span>
             <button class="btn-copy" id="copy-btn">Copy</button>
           </div>
           <div class="status">
@@ -81,7 +109,7 @@
             <p>Waiting for requests...</p>
             <p>Send a request to your webhook URL:</p>
             <div class="curl-command">
-              <code id="curl-code">curl -X POST -H "Content-Type: application/json" -d '{"hello": "world"}' ${webhookUrl}</code>
+              <code id="curl-code">curl -X POST -H "Content-Type: application/json" -d '{"hello": "world"}' ${escapeHtml(webhookUrl)}</code>
               <button class="btn-copy-curl" id="copy-curl-btn" title="Copy curl command">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
@@ -98,11 +126,19 @@
 
     // Copy button
     document.getElementById("copy-btn").addEventListener("click", () => {
-      navigator.clipboard.writeText(webhookUrl).then(() => {
-        const btn = document.getElementById("copy-btn");
-        btn.textContent = "Copied!";
-        setTimeout(() => (btn.textContent = "Copy"), 1500);
-      });
+      navigator.clipboard
+        .writeText(webhookUrl)
+        .then(() => {
+          const btn = document.getElementById("copy-btn");
+          btn.textContent = "Copied!";
+          setTimeout(() => (btn.textContent = "Copy"), 1500);
+        })
+        .catch(() => {
+          // Fallback for non-secure contexts
+          const btn = document.getElementById("copy-btn");
+          btn.textContent = "Failed";
+          setTimeout(() => (btn.textContent = "Copy"), 1500);
+        });
     });
 
     // Copy curl command button
@@ -110,10 +146,17 @@
     if (curlBtn) {
       curlBtn.addEventListener("click", () => {
         const curlCode = document.getElementById("curl-code");
-        navigator.clipboard.writeText(curlCode.textContent).then(() => {
-          curlBtn.classList.add("copied");
-          setTimeout(() => curlBtn.classList.remove("copied"), 1500);
-        });
+        navigator.clipboard
+          .writeText(curlCode.textContent)
+          .then(() => {
+            curlBtn.classList.add("copied");
+            setTimeout(() => curlBtn.classList.remove("copied"), 1500);
+          })
+          .catch(() => {
+            // Fallback for non-secure contexts
+            curlBtn.title = "Copy failed";
+            setTimeout(() => (curlBtn.title = "Copy curl command"), 1500);
+          });
       });
     }
 
@@ -128,8 +171,12 @@
     });
 
     eventSource.addEventListener("request", (e) => {
-      const data = JSON.parse(e.data);
-      addRequestCard(data);
+      try {
+        const data = JSON.parse(e.data);
+        addRequestCard(data);
+      } catch {
+        // Malformed SSE data, skip
+      }
     });
 
     eventSource.addEventListener("error", () => {
@@ -169,7 +216,7 @@
     let bodySection = "";
     if (req.body) {
       let formattedBody = req.body;
-      if (req.contentType && req.contentType.includes("json")) {
+      if (req.contentType?.includes("json")) {
         try {
           formattedBody = JSON.stringify(JSON.parse(req.body), null, 2);
         } catch {
@@ -187,7 +234,8 @@
     if (queryKeys.length > 0) {
       const params = queryKeys
         .map(
-          (k) => `<span class="query-param"><span class="query-param-key">${escapeHtml(k)}</span><span class="query-param-value">${escapeHtml(req.queryParams[k])}</span></span>`
+          (k) =>
+            `<span class="query-param"><span class="query-param-key">${escapeHtml(k)}</span><span class="query-param-value">${escapeHtml(req.queryParams[k])}</span></span>`,
         )
         .join("");
       querySection = `
@@ -197,15 +245,12 @@
     }
 
     const headerRows = Object.entries(req.headers || {})
-      .map(
-        ([k, v]) =>
-          `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`
-      )
+      .map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`)
       .join("");
 
     return `
       <div class="request-card-header">
-        <span class="method-badge ${methodClass}">${req.method}</span>
+        <span class="method-badge ${methodClass}">${escapeHtml(req.method)}</span>
         <div class="request-meta">
           <span class="request-time">${time}</span>
           ${sizeStr ? `<span class="request-size">${sizeStr}</span>` : ""}
@@ -229,14 +274,15 @@
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function formatSize(bytes) {
     if (!bytes || bytes === 0) return "";
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   function renderInfoSection() {

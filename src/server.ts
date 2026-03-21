@@ -1,15 +1,21 @@
-import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { Hono } from "hono";
 import { cors } from "hono/cors";
-import webhook from "./routes/webhook.js";
+import { rateLimit, stopRateLimitCleanup } from "./middleware/rate-limit.js";
 import api from "./routes/api.js";
 import pages from "./routes/pages.js";
+import webhook from "./routes/webhook.js";
+import { stopCleanup } from "./store.js";
 
 const app = new Hono();
 
 // CORS for API endpoints
 app.use("/api/*", cors());
+
+// Rate limiting for webhook and API endpoints
+app.use("/api/*", rateLimit());
+app.use("/w/*", rateLimit());
 
 // Health check
 app.get("/health", (c) => c.json({ status: "ok" }));
@@ -22,8 +28,18 @@ app.route("/", webhook);
 app.route("/", api);
 app.route("/", pages);
 
-const port = parseInt(process.env.PORT || "3000", 10);
+const port = Number(process.env.PORT || "3000") || 3000;
 
-console.log(`🚀 EchoValue running on http://localhost:${port}`);
+const server = serve({ fetch: app.fetch, port }, () => {
+  console.log(`🚀 EchoValue running on http://localhost:${port}`);
+});
 
-serve({ fetch: app.fetch, port });
+function shutdown() {
+  console.log("Shutting down...");
+  stopCleanup();
+  stopRateLimitCleanup();
+  server.close();
+}
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
