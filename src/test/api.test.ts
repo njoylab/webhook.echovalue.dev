@@ -1,8 +1,9 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { afterEach, describe, it } from "node:test";
 import { Hono } from "hono";
 import api from "../routes/api.js";
 import webhook from "../routes/webhook.js";
+import { clearSessions } from "../store.js";
 
 // Build a test app with both routers
 function buildApp() {
@@ -17,6 +18,8 @@ async function json(res: Response) {
 }
 
 describe("POST /api/sessions", () => {
+  afterEach(() => clearSessions());
+
   it("creates a session and returns id + webhookUrl", async () => {
     const app = buildApp();
     const res = await app.request("/api/sessions", { method: "POST" });
@@ -30,9 +33,13 @@ describe("POST /api/sessions", () => {
 });
 
 describe("GET /api/sessions/:id", () => {
+  afterEach(() => clearSessions());
+
   it("returns session data for a valid id", async () => {
     const app = buildApp();
-    const created = await (await app.request("/api/sessions", { method: "POST" })).json() as { id: string };
+    const created = (await (await app.request("/api/sessions", { method: "POST" })).json()) as {
+      id: string;
+    };
     const res = await app.request(`/api/sessions/${created.id}`);
     assert.equal(res.status, 200);
     const body = await json(res);
@@ -48,6 +55,8 @@ describe("GET /api/sessions/:id", () => {
 });
 
 describe("ANY /w/:id", () => {
+  afterEach(() => clearSessions());
+
   it("returns 404 for unknown session id", async () => {
     const app = buildApp();
     const res = await app.request("/w/ghost-id", { method: "POST", body: "{}" });
@@ -56,7 +65,9 @@ describe("ANY /w/:id", () => {
 
   it("captures a POST request with JSON body", async () => {
     const app = buildApp();
-    const { id } = await (await app.request("/api/sessions", { method: "POST" })).json() as { id: string };
+    const { id } = (await (await app.request("/api/sessions", { method: "POST" })).json()) as {
+      id: string;
+    };
 
     const whRes = await app.request(`/w/${id}`, {
       method: "POST",
@@ -64,11 +75,13 @@ describe("ANY /w/:id", () => {
       body: JSON.stringify({ hello: "world" }),
     });
     assert.equal(whRes.status, 200);
-    const ack = await whRes.json() as { status: string };
+    const ack = (await whRes.json()) as { status: string };
     assert.equal(ack.status, "ok");
 
     // Verify captured
-    const session = await (await app.request(`/api/sessions/${id}`)).json() as { requests: Array<{ method: string; body: string }> };
+    const session = (await (await app.request(`/api/sessions/${id}`)).json()) as {
+      requests: Array<{ method: string; body: string }>;
+    };
     assert.equal(session.requests.length, 1);
     assert.equal(session.requests[0].method, "POST");
     assert.equal(session.requests[0].body, JSON.stringify({ hello: "world" }));
@@ -76,11 +89,15 @@ describe("ANY /w/:id", () => {
 
   it("captures a GET request with query params", async () => {
     const app = buildApp();
-    const { id } = await (await app.request("/api/sessions", { method: "POST" })).json() as { id: string };
+    const { id } = (await (await app.request("/api/sessions", { method: "POST" })).json()) as {
+      id: string;
+    };
 
     await app.request(`/w/${id}?foo=bar&baz=42`, { method: "GET" });
 
-    const session = await (await app.request(`/api/sessions/${id}`)).json() as { requests: Array<{ method: string; queryParams: Record<string, string> }> };
+    const session = (await (await app.request(`/api/sessions/${id}`)).json()) as {
+      requests: Array<{ method: string; queryParams: Record<string, string> }>;
+    };
     assert.equal(session.requests[0].method, "GET");
     assert.equal(session.requests[0].queryParams.foo, "bar");
     assert.equal(session.requests[0].queryParams.baz, "42");
@@ -88,12 +105,16 @@ describe("ANY /w/:id", () => {
 
   it("captures PUT and DELETE methods", async () => {
     const app = buildApp();
-    const { id } = await (await app.request("/api/sessions", { method: "POST" })).json() as { id: string };
+    const { id } = (await (await app.request("/api/sessions", { method: "POST" })).json()) as {
+      id: string;
+    };
 
     await app.request(`/w/${id}`, { method: "PUT", body: "updated" });
     await app.request(`/w/${id}`, { method: "DELETE" });
 
-    const session = await (await app.request(`/api/sessions/${id}`)).json() as { requests: Array<{ method: string }> };
+    const session = (await (await app.request(`/api/sessions/${id}`)).json()) as {
+      requests: Array<{ method: string }>;
+    };
     assert.equal(session.requests.length, 2);
     assert.equal(session.requests[0].method, "PUT");
     assert.equal(session.requests[1].method, "DELETE");
@@ -106,7 +127,7 @@ describe("GET /health", () => {
     app.get("/health", (c) => c.json({ status: "ok" }));
     const res = await app.request("/health");
     assert.equal(res.status, 200);
-    const body = await res.json() as { status: string };
+    const body = (await res.json()) as { status: string };
     assert.equal(body.status, "ok");
   });
 });
