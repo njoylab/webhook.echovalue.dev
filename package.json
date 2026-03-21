@@ -7,7 +7,14 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsx --test src/test/*.test.ts"
+    "test": "tsx --test --test-force-exit src/test/*.test.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
@@ -15,6 +22,7 @@
     "nanoid": "^5.1.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
     "@types/node": "^22.14.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"

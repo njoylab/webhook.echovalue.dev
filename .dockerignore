@@ -1,7 +1,8 @@
 node_modules/
 dist/
 coverage/
+.git/
+*.md
 .env
 .DS_Store
-*.log
 .vscode/
