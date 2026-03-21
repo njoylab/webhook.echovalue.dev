@@ -63,6 +63,10 @@ api.get("/api/sessions/:id/stream", (c) => {
       data: JSON.stringify({ sessionId }),
     });
 
+    // Force upstream proxies (Cloudflare, Traefik, etc.) to flush the response
+    // by sending a padding comment that exceeds typical buffer thresholds
+    await stream.write(`:${" ".repeat(2048)}\n\n`);
+
     // Listen for new requests
     const listener = async (data: CapturedRequest) => {
       try {
