@@ -19,10 +19,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
+RUN addgroup -S appgroup && adduser -S appuser -u 1001 -G appgroup
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY public ./public
 COPY package.json ./
+
+RUN chown -R appuser:appgroup /app
+USER appuser
 
 EXPOSE 3000
 

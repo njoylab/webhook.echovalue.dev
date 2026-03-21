@@ -15,7 +15,7 @@ A free, open-source webhook relay and inspection tool at **webhook.echovalue.dev
 | ID generation | `nanoid` |
 | Dev runner | `tsx watch` |
 | Build | `tsc` → `dist/` |
-| Deploy | Docker (multi-stage, `node:20-alpine`) on Coolify |
+| Deploy | Docker (multi-stage, `node:22-alpine`) on Coolify |
 
 Runtime dependencies: only 3 (`hono`, `@hono/node-server`, `nanoid`).
 
@@ -26,6 +26,8 @@ src/
   server.ts          # Entry point — mounts all routes, starts server
   types.ts           # Session and CapturedRequest interfaces
   store.ts           # In-memory Map store, pub/sub listeners, TTL cleanup
+  middleware/
+    rate-limit.ts    # Custom IP-based rate limiter
   routes/
     webhook.ts       # app.all('/w/:id') — captures all HTTP methods
     api.ts           # POST/GET /api/sessions, GET /api/sessions/:id/stream (SSE)
@@ -42,6 +44,14 @@ public/
   favicon.ico        # Multi-size favicon (16+32px)
   favicon.png        # 32×32 PNG favicon
   favicon-64.png     # 64×64 PNG favicon (retina)
+
+.github/
+  workflows/
+    ci.yml           # GitHub Actions: lint, build, test
+
+biome.json           # Biome linter/formatter config
+LICENSE              # MIT license
+.dockerignore        # Docker build exclusions
 ```
 
 ## Key commands
@@ -51,6 +61,9 @@ npm run dev      # tsx watch src/server.ts — hot reload on port $PORT (default
 npm run build    # tsc → dist/
 npm start        # node dist/server.js — production
 npm test         # tsx --test src/test/*.test.ts
+npm run lint     # biome check .
+npm run lint:fix # biome check --write .
+npm run format   # biome format --write .
 ```
 
 Node.js is managed via nvm. Always source nvm before running commands:
@@ -105,7 +118,7 @@ CSS uses `prefers-color-scheme` as base + `data-theme` attribute override (set b
 
 ## Deploy (Coolify)
 
-- Build method: **Dockerfile** (multi-stage, `node:20-alpine`)
+- Build method: **Dockerfile** (multi-stage, `node:22-alpine`)
 - Port: `3000` (override with `PORT` env var)
 - Health check: `GET /health`
 - Coolify handles SSL (Let's Encrypt) and reverse proxy (Traefik)

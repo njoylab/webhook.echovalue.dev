@@ -1,11 +1,6 @@
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
-import {
-  createSession,
-  getSession,
-  addListener,
-  removeListener,
-} from "../store.js";
+import { addListener, createSession, getSession, removeListener } from "../store.js";
 import type { CapturedRequest } from "../types.js";
 
 const api = new Hono();
