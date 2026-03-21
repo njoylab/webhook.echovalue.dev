@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
-import type { Session, CapturedRequest } from "./types.js";
+import type { CapturedRequest, Session } from "./types.js";
 
 const MAX_REQUESTS_PER_SESSION = 100;
-const MAX_SESSIONS = 10_000;
+export const MAX_SESSIONS = 10_000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_BODY_SIZE = 1024 * 1024; // 1MB
@@ -10,7 +10,7 @@ const MAX_BODY_SIZE = 1024 * 1024; // 1MB
 const sessions = new Map<string, Session>();
 
 // Cleanup expired sessions periodically
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now();
   for (const [id, session] of sessions) {
     if (now - session.createdAt > SESSION_TTL_MS) {
@@ -19,6 +19,17 @@ setInterval(() => {
     }
   }
 }, CLEANUP_INTERVAL_MS);
+
+export function stopCleanup(): void {
+  clearInterval(cleanupInterval);
+}
+
+export function clearSessions(): void {
+  for (const session of sessions.values()) {
+    session.listeners.clear();
+  }
+  sessions.clear();
+}
 
 export function createSession(): Session {
   if (sessions.size >= MAX_SESSIONS) {
@@ -47,7 +58,7 @@ export function getSession(id: string): Session | undefined {
 
 export function addRequest(
   sessionId: string,
-  request: Omit<CapturedRequest, "id">
+  request: Omit<CapturedRequest, "id">,
 ): CapturedRequest | null {
   const session = sessions.get(sessionId);
   if (!session) return null;
@@ -55,7 +66,7 @@ export function addRequest(
   // Truncate body if too large
   let body = request.body;
   if (body && body.length > MAX_BODY_SIZE) {
-    body = body.slice(0, MAX_BODY_SIZE) + "\n... [truncated]";
+    body = `${body.slice(0, MAX_BODY_SIZE)}\n... [truncated]`;
   }
 
   const captured: CapturedRequest = {
@@ -71,28 +82,22 @@ export function addRequest(
     session.requests.shift();
   }
 
-  // Notify all listeners
-  for (const listener of session.listeners) {
+  // Snapshot listeners to avoid mutation during iteration
+  for (const listener of [...session.listeners]) {
     listener(captured);
   }
 
   return captured;
 }
 
-export function addListener(
-  sessionId: string,
-  listener: (data: CapturedRequest) => void
-): boolean {
+export function addListener(sessionId: string, listener: (data: CapturedRequest) => void): boolean {
   const session = sessions.get(sessionId);
   if (!session) return false;
   session.listeners.add(listener);
   return true;
 }
 
-export function removeListener(
-  sessionId: string,
-  listener: (data: CapturedRequest) => void
-): void {
+export function removeListener(sessionId: string, listener: (data: CapturedRequest) => void): void {
   const session = sessions.get(sessionId);
   if (session) {
     session.listeners.delete(listener);

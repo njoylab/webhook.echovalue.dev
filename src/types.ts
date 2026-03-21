@@ -15,5 +15,5 @@ export interface Session {
   id: string;
   createdAt: number;
   requests: CapturedRequest[];
-  listeners: Set<(data: CapturedRequest) => void>;
+  listeners: Set<(data: CapturedRequest) => void | Promise<void>>;
 }
