@@ -3,7 +3,10 @@
   const path = window.location.pathname;
   const app = document.getElementById("app");
 
+  // ==========================================
   // Theme management
+  // ==========================================
+
   function getEffectiveTheme() {
     const saved = localStorage.getItem("theme");
     if (saved) return saved;
@@ -36,7 +39,6 @@
     });
     document.body.appendChild(btn);
 
-    // React to OS theme changes (when no manual preference is set)
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
       if (!localStorage.getItem("theme")) {
         applyTheme(getEffectiveTheme());
@@ -46,6 +48,10 @@
   }
 
   initTheme();
+
+  // ==========================================
+  // Routing
+  // ==========================================
 
   if (path.startsWith("/s/")) {
     const sessionId = path.match(/\/s\/([^/]+)/)?.[1] || "";
@@ -85,80 +91,120 @@
     }
   }
 
+  // ==========================================
+  // Inspector — Split View
+  // ==========================================
+
+  let requests = [];
+  let selectedId = null;
+  let hasReceivedFirstRequest = false;
+
   function renderInspector(sessionId) {
     const protocol = window.location.protocol;
     const host = window.location.host;
     const webhookUrl = `${protocol}//${host}/w/${sessionId}`;
 
     app.innerHTML = `
-      <div class="inspector">
-        <a href="/" class="back-link">&larr; New webhook</a>
-        <div class="inspector-header">
-          <h2>Webhook Inspector</h2>
-          <div class="webhook-url-box">
-            <span class="webhook-url" id="webhook-url">${escapeHtml(webhookUrl)}</span>
-            <button class="btn-copy" id="copy-btn">Copy</button>
+      <div class="inspector-wrapper">
+        <div class="inspector-layout">
+          <div class="inspector-sidebar">
+            <div class="sidebar-header">
+              <div class="sidebar-header-row">
+                <h2>
+                  <span class="sidebar-brand">echo<span>value</span></span>
+                  <span class="sidebar-count" id="request-count">0</span>
+                </h2>
+                <div class="sidebar-actions">
+                  <a href="/" class="btn-new-session" title="Create new session">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    New
+                  </a>
+                </div>
+              </div>
+              <div class="sidebar-url-box">
+                <span class="sidebar-url" title="${escapeHtml(webhookUrl)}">${escapeHtml(webhookUrl)}</span>
+                <button class="btn-copy-url" id="copy-btn" title="Copy URL">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                </button>
+              </div>
+              <div class="sidebar-status">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">Connecting...</span>
+              </div>
+            </div>
+            <div class="request-list-sidebar" id="request-list-sidebar">
+              <div class="sidebar-empty" id="sidebar-empty">
+                <div class="sidebar-empty-icon">&#9678;</div>
+                <p>Waiting for requests...</p>
+              </div>
+            </div>
           </div>
-          <div class="status">
-            <span class="status-dot" id="status-dot"></span>
-            <span id="status-text">Connecting...</span>
-          </div>
-        </div>
-        <div class="request-list" id="request-list">
-          <div class="empty-state" id="empty-state">
-            <p>Waiting for requests...</p>
-            <p>Send a request to your webhook URL:</p>
-            <div class="curl-command">
-              <code id="curl-code">curl -X POST -H "Content-Type: application/json" -d '{"hello": "world"}' ${escapeHtml(webhookUrl)}</code>
-              <button class="btn-copy-curl" id="copy-curl-btn" title="Copy curl command">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                </svg>
-              </button>
+          <div class="detail-panel" id="detail-panel">
+            <div class="detail-body-scroll" id="detail-body">
+              <div id="detail-empty-content">
+                <div class="empty-curl-section">
+                  <div class="detail-section-title">Try it out</div>
+                  <p class="empty-hint">Send a request to your webhook URL to see it appear here in real-time.</p>
+                  <div class="curl-block">
+                    <code id="curl-code">curl -X POST ${escapeHtml(webhookUrl)} \\
+  -H "Content-Type: application/json" \\
+  -d '{"hello": "world"}'</code>
+                    <button class="btn-copy-curl" id="copy-curl-btn" title="Copy curl command">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                    </button>
+                  </div>
+                </div>
+                ${renderInfoSection()}
+              </div>
+              <div id="detail-request-content" style="display:none"></div>
+              <div id="detail-info-collapsible" style="display:none">
+                ${renderInfoSection(true)}
+              </div>
             </div>
           </div>
         </div>
+        ${renderFooter()}
       </div>
-      ${renderInfoSection()}
-      ${renderFooter()}
     `;
 
-    // Copy button
+    // Reset state
+    requests = [];
+    selectedId = null;
+
+    // Copy URL button
     document.getElementById("copy-btn").addEventListener("click", () => {
       navigator.clipboard
         .writeText(webhookUrl)
         .then(() => {
           const btn = document.getElementById("copy-btn");
-          btn.textContent = "Copied!";
-          setTimeout(() => (btn.textContent = "Copy"), 1500);
+          btn.classList.add("copied");
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>`;
+          }, 1500);
         })
-        .catch(() => {
-          // Fallback for non-secure contexts
-          const btn = document.getElementById("copy-btn");
-          btn.textContent = "Failed";
-          setTimeout(() => (btn.textContent = "Copy"), 1500);
-        });
+        .catch(() => {});
     });
 
     // Copy curl command button
-    const curlBtn = document.getElementById("copy-curl-btn");
-    if (curlBtn) {
-      curlBtn.addEventListener("click", () => {
-        const curlCode = document.getElementById("curl-code");
-        navigator.clipboard
-          .writeText(curlCode.textContent)
-          .then(() => {
-            curlBtn.classList.add("copied");
-            setTimeout(() => curlBtn.classList.remove("copied"), 1500);
-          })
-          .catch(() => {
-            // Fallback for non-secure contexts
-            curlBtn.title = "Copy failed";
-            setTimeout(() => (curlBtn.title = "Copy curl command"), 1500);
-          });
-      });
-    }
+    document.getElementById("copy-curl-btn")?.addEventListener("click", () => {
+      const curlCode = document.getElementById("curl-code");
+      navigator.clipboard
+        .writeText(curlCode.textContent)
+        .then(() => {
+          const btn = document.getElementById("copy-curl-btn");
+          btn.classList.add("copied");
+          setTimeout(() => btn.classList.remove("copied"), 1500);
+        })
+        .catch(() => {});
+    });
+
+    // Close info button (in collapsible section)
+    document.getElementById("close-info-btn")?.addEventListener("click", () => {
+      const collapsible = document.getElementById("detail-info-collapsible");
+      if (collapsible) collapsible.style.display = "none";
+    });
 
     // SSE connection
     const eventSource = new EventSource(`/api/sessions/${sessionId}/stream`);
@@ -167,50 +213,124 @@
 
     eventSource.addEventListener("ready", () => {
       statusDot.classList.remove("disconnected");
-      statusText.textContent = "Connected - listening for requests";
+      statusText.textContent = "Connected";
     });
 
     eventSource.addEventListener("request", (e) => {
       try {
         const data = JSON.parse(e.data);
-        addRequestCard(data);
+        addRequest(data);
       } catch {
-        // Malformed SSE data, skip
+        // skip malformed
       }
     });
 
     eventSource.addEventListener("error", () => {
       statusDot.classList.add("disconnected");
-      statusText.textContent = "Disconnected - reconnecting...";
+      statusText.textContent = "Reconnecting...";
     });
 
     eventSource.addEventListener("open", () => {
       statusDot.classList.remove("disconnected");
-      statusText.textContent = "Waiting for data...";
+      statusText.textContent = "Listening";
     });
   }
 
-  function addRequestCard(req) {
-    const emptyState = document.getElementById("empty-state");
+  // ==========================================
+  // Request management
+  // ==========================================
+
+  function addRequest(req) {
+    requests.push(req);
+
+    // Remove sidebar empty state
+    const emptyState = document.getElementById("sidebar-empty");
     if (emptyState) emptyState.remove();
 
-    const list = document.getElementById("request-list");
-    const card = document.createElement("div");
-    card.className = "request-card";
-    card.innerHTML = buildCardHTML(req);
+    // On first request: hide empty content, show request content + collapsible info
+    if (!hasReceivedFirstRequest) {
+      hasReceivedFirstRequest = true;
+      const emptyContent = document.getElementById("detail-empty-content");
+      if (emptyContent) emptyContent.style.display = "none";
+      const requestContent = document.getElementById("detail-request-content");
+      if (requestContent) requestContent.style.display = "block";
+      const collapsible = document.getElementById("detail-info-collapsible");
+      if (collapsible) collapsible.style.display = "block";
+    }
 
-    // Insert at the top
-    list.prepend(card);
+    // Add sidebar entry
+    const list = document.getElementById("request-list-sidebar");
+    const entry = createSidebarEntry(req, true);
+    list.prepend(entry);
 
-    // Toggle expand
-    card.querySelector(".request-card-header").addEventListener("click", () => {
-      card.classList.toggle("expanded");
-    });
+    // Update count
+    const countEl = document.getElementById("request-count");
+    if (countEl) countEl.textContent = requests.length;
+
+    // Auto-select if nothing is selected
+    if (selectedId === null) {
+      selectRequest(req.id);
+    }
   }
 
-  function buildCardHTML(req) {
+  function selectRequest(id) {
+    selectedId = id;
+
+    // Update sidebar selection
+    const entries = document.querySelectorAll(".sidebar-entry");
+    entries.forEach((el) => {
+      el.classList.toggle("selected", el.dataset.id === id);
+    });
+
+    // Render detail
+    const req = requests.find((r) => r.id === id);
+    if (req) {
+      renderDetail(req);
+    }
+  }
+
+  // ==========================================
+  // Sidebar entry
+  // ==========================================
+
+  function createSidebarEntry(req, isNew) {
     const time = new Date(req.timestamp).toLocaleTimeString();
-    const methodClass = `method-${req.method}`;
+    const sizeStr = formatSize(req.size);
+
+    const entry = document.createElement("div");
+    entry.className = `sidebar-entry${isNew ? " new-arrival" : ""}${req.id === selectedId ? " selected" : ""}`;
+    entry.dataset.id = req.id;
+    entry.tabIndex = 0;
+
+    entry.innerHTML = `
+      <span class="entry-method method-${req.method}">${escapeHtml(req.method)}</span>
+      <div class="entry-info">
+        <div class="entry-path">${escapeHtml(req.path || "/")}</div>
+        <div class="entry-meta">
+          <span>${time}</span>
+          ${sizeStr ? `<span class="entry-size">${sizeStr}</span>` : ""}
+        </div>
+      </div>
+    `;
+
+    entry.addEventListener("click", () => selectRequest(req.id));
+    entry.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectRequest(req.id);
+      }
+    });
+
+    return entry;
+  }
+
+  // ==========================================
+  // Detail panel
+  // ==========================================
+
+  function renderDetail(req) {
+    const container = document.getElementById("detail-request-content");
+    const time = new Date(req.timestamp).toLocaleTimeString();
     const sizeStr = formatSize(req.size);
 
     let bodySection = "";
@@ -220,12 +340,14 @@
         try {
           formattedBody = JSON.stringify(JSON.parse(req.body), null, 2);
         } catch {
-          // Keep as-is
+          // keep raw
         }
       }
       bodySection = `
-        <div class="section-title">Body</div>
-        <div class="code-block">${escapeHtml(formattedBody)}</div>
+        <div class="detail-section">
+          <div class="detail-section-title">Body</div>
+          <div class="code-block">${escapeHtml(formattedBody)}</div>
+        </div>
       `;
     }
 
@@ -239,8 +361,10 @@
         )
         .join("");
       querySection = `
-        <div class="section-title">Query Parameters</div>
-        <div class="query-params">${params}</div>
+        <div class="detail-section">
+          <div class="detail-section-title">Query Parameters</div>
+          <div class="query-params">${params}</div>
+        </div>
       `;
     }
 
@@ -248,25 +372,31 @@
       .map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`)
       .join("");
 
-    return `
-      <div class="request-card-header">
-        <span class="method-badge ${methodClass}">${escapeHtml(req.method)}</span>
-        <div class="request-meta">
-          <span class="request-time">${time}</span>
-          ${sizeStr ? `<span class="request-size">${sizeStr}</span>` : ""}
+    container.innerHTML = `
+      <div class="detail-header">
+        <div class="detail-method-row">
+          <span class="detail-method method-${req.method}">${escapeHtml(req.method)}</span>
+          <span class="detail-time">${time}</span>
+          ${sizeStr ? `<span class="detail-size">${sizeStr}</span>` : ""}
         </div>
-        <span class="expand-icon">&#9654;</span>
+        <div class="detail-ip">${escapeHtml(req.path || "/")}${req.ip ? ` &middot; ${escapeHtml(req.ip)}` : ""}</div>
       </div>
-      <div class="request-card-body">
+      <div class="detail-section">
         ${querySection}
         ${bodySection}
-        <div class="section-title">Headers</div>
-        <table class="header-table">
-          ${headerRows}
-        </table>
+        <div class="detail-section">
+          <div class="detail-section-title">Headers</div>
+          <table class="header-table">
+            ${headerRows}
+          </table>
+        </div>
       </div>
     `;
   }
+
+  // ==========================================
+  // Utilities
+  // ==========================================
 
   function escapeHtml(str) {
     if (!str) return "";
@@ -285,10 +415,13 @@
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  function renderInfoSection() {
+  function renderInfoSection(closable) {
     return `
       <div class="info-section">
-        <h3>How it works &amp; Fair Usage</h3>
+        <div class="info-section-header">
+          <h3>How it works &amp; Fair Usage</h3>
+          ${closable ? `<button class="btn-close-info" id="close-info-btn" title="Close">&times;</button>` : ""}
+        </div>
         <div class="info-grid">
           <div class="info-card">
             <strong>How it works</strong>
