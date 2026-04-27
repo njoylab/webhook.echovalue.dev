@@ -6,78 +6,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+  >
 
-  <title>Terms & Conditions — EchoValue</title>
+  <title>Terms &amp; Conditions | echoValue Webhook</title>
   <link rel="stylesheet" href="/public/styles.css">
-  <style>
-    .terms-wrap {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 2rem;
-    }
-
-    .terms-wrap h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .terms-wrap .updated {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      margin-bottom: 2.5rem;
-    }
-
-    .terms-wrap h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin: 2rem 0 0.5rem;
-    }
-
-    .terms-wrap p,
-    .terms-wrap li {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      line-height: 1.7;
-    }
-
-    .terms-wrap ul {
-      padding-left: 1.25rem;
-      margin-top: 0.4rem;
-    }
-
-    .terms-wrap li {
-      margin-bottom: 0.25rem;
-    }
-
-    .terms-wrap a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .terms-wrap a:hover {
-      text-decoration: underline;
-    }
-  </style>
 </head>
 
 <body>
-  <div class="terms-wrap">
-    <a href="/" class="back-link">&larr; Back to EchoValue</a>
-    <h1>Terms &amp; Conditions</h1>
-    <p class="updated">Last updated: March 2026</p>
+  <div class="page-shell terms-page">
+    <header class="site-header">
+      <a class="brand-lockup" href="/" aria-label="echoValue webhook inspector">
+        <span class="brand-mark">echoValue</span>
+        <span class="brand-divider">/</span>
+        <span class="brand-tool">webhook</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="https://www.echovalue.dev/" target="_blank" rel="noopener noreferrer">More Tools</a>
+        <a href="https://github.com/njoylab/webhook.echovalue.dev" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="/terms">Terms</a>
+      </nav>
+    </header>
+
+    <main class="terms-wrap">
+      <a href="/" class="back-link">Back to webhook inspector</a>
+      <p class="section-label">Legal</p>
+      <h1>Terms &amp; Conditions</h1>
+      <p class="updated">Last updated: March 2026</p>
 
     <h2>1. Service Description</h2>
-    <p>EchoValue Webhook (<strong>webhook.echovalue.dev</strong>) is a free webhook inspection tool provided by <a
+    <p>echoValue Webhook (<strong>webhook.echovalue.dev</strong>) is a free webhook inspection tool provided by <a
         href="https://njoylab.com" target="_blank" rel="noopener">nJoyLab.com</a>. It allows users to generate unique
       URLs to capture and inspect HTTP requests in real-time, without requiring registration or authentication.</p>
 
     <h2>2. Acceptance of Terms</h2>
-    <p>By accessing or using EchoValue Webhook, you agree to be bound by these Terms &amp; Conditions. If you do not
+    <p>By accessing or using echoValue Webhook, you agree to be bound by these Terms &amp; Conditions. If you do not
       agree, please discontinue use immediately.</p>
 
     <h2>3. Permitted Use</h2>
-    <p>EchoValue Webhook is intended for lawful development and testing purposes only. Permitted uses include:</p>
+    <p>echoValue Webhook is intended for lawful development and testing purposes only. Permitted uses include:</p>
     <ul>
       <li>Testing webhook integrations and HTTP clients</li>
       <li>Debugging payloads sent by third-party services</li>
@@ -85,7 +56,7 @@
     </ul>
 
     <h2>4. Prohibited Use</h2>
-    <p>You may not use EchoValue to:</p>
+    <p>You may not use echoValue to:</p>
     <ul>
       <li>Collect, store, or relay personal data of third parties without their consent</li>
       <li>Receive, store, or transmit passwords, API keys, financial data, or any other sensitive credentials</li>
@@ -96,7 +67,7 @@
     </ul>
 
     <h2>5. Data Retention &amp; Privacy</h2>
-    <p>EchoValue is designed to be ephemeral:</p>
+    <p>echoValue is designed to be ephemeral:</p>
     <ul>
       <li>All data is stored <strong>in memory only</strong> — no database, no disk writes</li>
       <li>Sessions and all captured requests are <strong>automatically deleted after 24 hours</strong></li>
@@ -105,7 +76,7 @@
       <li>IP addresses may be captured as part of request metadata and are visible only to the session owner. They are
         deleted with the session.</li>
     </ul>
-    <p><strong>Do not send sensitive data</strong> (passwords, tokens, personal information) through EchoValue. Sessions
+    <p><strong>Do not send sensitive data</strong> (passwords, tokens, personal information) through echoValue. Sessions
       are not encrypted at rest and URLs are not secret — anyone with the session URL can view captured requests.</p>
 
     <h2>6. Fair Usage</h2>
@@ -119,13 +90,13 @@
       our sole discretion and without notice.</p>
 
     <h2>7. Disclaimer of Warranties</h2>
-    <p>EchoValue is provided <strong>"as is"</strong> without warranties of any kind, express or implied. We do not
+    <p>echoValue is provided <strong>"as is"</strong> without warranties of any kind, express or implied. We do not
       guarantee uptime, data persistence, or fitness for any particular purpose. The service may be modified, suspended,
       or discontinued at any time without notice.</p>
 
     <h2>8. Limitation of Liability</h2>
     <p>nJoyLab.com shall not be liable for any direct, indirect, incidental, or consequential damages arising from your
-      use of, or inability to use, EchoValue Webhook — including but not limited to data loss, service interruption, or
+      use of, or inability to use, echoValue Webhook - including but not limited to data loss, service interruption, or
       security
       incidents resulting from misuse.</p>
 
@@ -137,18 +108,19 @@
     <p>For questions or concerns, contact us via <a href="https://echovalue.dev" target="_blank"
         rel="noopener">echovalue.dev</a> or open an issue on <a href="https://github.com/njoylab/webhook.echovalue.dev"
         target="_blank" rel="noopener">GitHub</a>.</p>
-  </div>
+    </main>
 
-  <footer class="site-footer">
-    <span>Built by <a href="https://njoylab.com" class="footer-brand" target="_blank"
-        rel="noopener">nJoyLab.com</a></span>
-    <span class="footer-sep">·</span>
-    <a href="https://www.echovalue.dev/" target="_blank" rel="noopener">More Tools</a>
-    <span class="footer-sep">·</span>
-    <a href="https://github.com/njoylab/webhook.echovalue.dev" target="_blank" rel="noopener">GitHub</a>
-    <span class="footer-sep">·</span>
-    <a href="/terms">Terms &amp; Conditions</a>
-  </footer>
+    <footer class="site-footer">
+      <span>Built by <a href="https://njoylab.com" class="footer-brand" target="_blank"
+          rel="noopener">nJoyLab.com</a></span>
+      <span class="footer-sep">·</span>
+      <a href="https://www.echovalue.dev/" target="_blank" rel="noopener">More Tools</a>
+      <span class="footer-sep">·</span>
+      <a href="https://github.com/njoylab/webhook.echovalue.dev" target="_blank" rel="noopener">GitHub</a>
+      <span class="footer-sep">·</span>
+      <a href="/terms">Terms &amp; Conditions</a>
+    </footer>
+  </div>
 </body>
 
 </html>

@@ -9,24 +9,30 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon.png">
   <link rel="icon" type="image/png" sizes="64x64" href="/public/favicon-64.png">
 
-  <title>EchoValue — Free Webhook Testing & Inspection Tool</title>
+  <title>echoValue Webhook Inspector | Free Webhook Testing</title>
   <meta name="description"
     content="Test and debug webhooks instantly. Get a unique URL, send any HTTP request, and see headers, body, and query params in real-time. No signup required.">
   <meta name="keywords"
     content="webhook testing, webhook inspector, webhook debugger, http request capture, webhook relay, free webhook tool">
   <link rel="canonical" href="https://webhook.echovalue.dev/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+  >
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://webhook.echovalue.dev/">
-  <meta property="og:title" content="EchoValue — Free Webhook Testing & Inspection Tool">
+  <meta property="og:title" content="echoValue Webhook Inspector | Free Webhook Testing">
   <meta property="og:description"
     content="Get a unique webhook URL and inspect any HTTP request in real-time. No signup, no setup. Built for developers.">
-  <meta property="og:site_name" content="EchoValue.dev Webhook">
+  <meta property="og:site_name" content="echoValue webhook">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="EchoValue — Free Webhook Testing">
+  <meta name="twitter:title" content="echoValue Webhook Inspector">
   <meta name="twitter:description"
     content="Instant webhook inspection. Unique URL, real-time request capture, no signup.">
 
@@ -37,7 +43,7 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "EchoValue Webhook Inspector",
+    "name": "echoValue Webhook Inspector",
     "url": "https://webhook.echovalue.dev",
     "description": "Free webhook testing and inspection tool. Generate a unique URL and capture any HTTP request in real-time.",
     "applicationCategory": "DeveloperApplication",
@@ -51,26 +57,41 @@
 <body>
   <div id="app">
     <!-- Static content for SEO crawlers — replaced by app.js at runtime -->
-    <div class="landing">
-      <h1>echo<span>value</span></h1>
-      <p>Free webhook testing &amp; inspection tool. Get a unique URL, send any HTTP request, and see headers, body, and
-        query params in real-time. No signup required.</p>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand-lockup" href="/" aria-label="echoValue webhook inspector">
+          <span class="brand-mark">echoValue</span>
+          <span class="brand-divider">/</span>
+          <span class="brand-tool">webhook</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="https://www.echovalue.dev/" target="_blank" rel="noopener noreferrer">More Tools</a>
+          <a href="https://github.com/njoylab/webhook.echovalue.dev" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="/terms">Terms</a>
+        </nav>
+      </header>
+      <main class="landing">
+        <p class="section-label">Developer utility</p>
+        <h1>Webhook Inspector</h1>
+        <p>Free webhook testing and inspection. Get a unique URL, send any HTTP request, and inspect headers, body, and
+          query params in real time.</p>
 
-      <ul style="display:none">
-        <li>Capture GET, POST, PUT, PATCH, DELETE and any HTTP method</li>
-        <li>Inspect headers, body, query parameters, and IP address</li>
-        <li>Real-time updates via Server-Sent Events — no polling</li>
-        <li>JSON bodies are automatically pretty-printed</li>
-        <li>Sessions auto-expire after 24 hours — no data stored on disk</li>
-        <li>Open source — built by nJoyLab.com</li>
-      </ul>
+        <ul style="display:none">
+          <li>Capture GET, POST, PUT, PATCH, DELETE and any HTTP method</li>
+          <li>Inspect headers, body, query parameters, and IP address</li>
+          <li>Real-time updates via Server-Sent Events - no polling</li>
+          <li>JSON bodies are automatically pretty-printed</li>
+          <li>Sessions auto-expire after 24 hours - no data stored on disk</li>
+          <li>Open source - built by nJoyLab.com</li>
+        </ul>
+      </main>
     </div>
   </div>
   <script src="/public/app.js"></script>
   <noscript>
     <div style="text-align:center;padding:2rem;font-family:sans-serif;">
       <h2>JavaScript required</h2>
-      <p>EchoValue Webhook Inspector requires JavaScript to function. Please enable JavaScript in your browser settings.</p>
+      <p>echoValue Webhook Inspector requires JavaScript to function. Please enable JavaScript in your browser settings.</p>
     </div>
   </noscript>
 </body>
