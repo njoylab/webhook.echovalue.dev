@@ -83,7 +83,7 @@
                   <span class="sidebar-count" id="request-count">0</span>
                 </h2>
                 <div class="sidebar-actions">
-                  <button class="btn-new-session" id="clear-btn" title="Clear history">
+                  <button class="btn-new-session" id="clear-btn" type="button" title="Clear history">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     Clear
                   </button>
@@ -95,7 +95,7 @@
               </div>
               <div class="sidebar-url-box">
                 <span class="sidebar-url" title="${escapeHtml(webhookUrl)}">${escapeHtml(webhookUrl)}</span>
-                <button class="btn-copy-url" id="copy-btn" title="Copy URL">
+                <button class="btn-copy-url" id="copy-btn" type="button" title="Copy URL" aria-label="Copy webhook URL">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
                 </button>
               </div>
@@ -121,7 +121,7 @@
                     <code id="curl-code">curl -X POST ${escapeHtml(webhookUrl)} \\
   -H "Content-Type: application/json" \\
   -d '{"hello": "world"}'</code>
-                    <button class="btn-copy-curl" id="copy-curl-btn" title="Copy curl command">
+                    <button class="btn-copy-curl" id="copy-curl-btn" type="button" title="Copy curl command" aria-label="Copy curl command">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
                     </button>
                   </div>
@@ -415,7 +415,7 @@
       <div class="info-section">
         <div class="info-section-header">
           <h3>How it works &amp; Fair Usage</h3>
-          ${closable ? `<button class="btn-close-info" id="close-info-btn" title="Close">&times;</button>` : ""}
+          ${closable ? `<button class="btn-close-info" id="close-info-btn" type="button" title="Close" aria-label="Close fair usage information">&times;</button>` : ""}
         </div>
         <div class="info-grid">
           <div class="info-card">

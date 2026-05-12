@@ -21,7 +21,16 @@ app.use("/w/*", rateLimit());
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 // Static files
-app.use("/public/*", serveStatic({ root: "./" }));
+app.use(
+  "/public/*",
+  serveStatic({
+    root: "./",
+    onFound: (path, c) => {
+      const maxAge = /\.(?:ico|png|svg|webp|jpg|jpeg|avif)$/i.test(path) ? 604800 : 86400;
+      c.header("Cache-Control", `public, max-age=${maxAge}, stale-while-revalidate=604800`);
+    },
+  }),
+);
 
 // Routes
 app.route("/", webhook);
