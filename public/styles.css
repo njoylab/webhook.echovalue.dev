@@ -129,9 +129,13 @@ a:hover {
   color: var(--text);
 }
 
-.brand-divider,
+.brand-divider {
+  display: none;
+}
+
 .brand-tool {
-  color: var(--text-muted);
+  color: #30d158;
+  font-weight: 500;
 }
 
 .site-nav {
@@ -182,7 +186,8 @@ a:hover {
 }
 
 .sidebar-brand span {
-  color: var(--accent);
+  color: #30d158;
+  font-weight: 500;
 }
 
 .landing h1 span {

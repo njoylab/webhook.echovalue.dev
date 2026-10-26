@@ -79,7 +79,7 @@
             <div class="sidebar-header">
               <div class="sidebar-header-row">
                 <h2>
-                  <span class="sidebar-brand">echoValue <span>/ webhook</span></span>
+                  <span class="sidebar-brand">echoValue <span>webhook</span></span>
                   <span class="sidebar-count" id="request-count">0</span>
                 </h2>
                 <div class="sidebar-actions">
