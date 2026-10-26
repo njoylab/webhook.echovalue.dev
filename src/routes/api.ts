@@ -1,6 +1,14 @@
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
-import { addListener, createSession, getSession, removeListener } from "../store.js";
+import {
+  addClearListener,
+  addListener,
+  clearRequests,
+  createSession,
+  getSession,
+  removeClearListener,
+  removeListener,
+} from "../store.js";
 import type { CapturedRequest } from "../types.js";
 
 const api = new Hono();
@@ -31,6 +39,15 @@ api.get("/api/sessions/:id", (c) => {
     createdAt: session.createdAt,
     requests: session.requests,
   });
+});
+
+api.delete("/api/sessions/:id/requests", (c) => {
+  const sessionId = c.req.param("id");
+  if (!clearRequests(sessionId)) {
+    return c.json({ error: "Session not found" }, 404);
+  }
+
+  return c.json({ cleared: true });
 });
 
 // SSE stream for real-time updates
@@ -82,6 +99,19 @@ api.get("/api/sessions/:id/stream", (c) => {
 
     addListener(sessionId, listener);
 
+    const onClear = async () => {
+      try {
+        await stream.writeSSE({
+          event: "cleared",
+          data: JSON.stringify({ sessionId }),
+        });
+      } catch {
+        // Stream closed, listener will be removed on abort
+      }
+    };
+
+    addClearListener(sessionId, onClear);
+
     // Keep the stream alive with periodic pings
     const pingInterval = setInterval(async () => {
       try {
@@ -98,6 +128,7 @@ api.get("/api/sessions/:id/stream", (c) => {
     stream.onAbort(() => {
       clearInterval(pingInterval);
       removeListener(sessionId, listener);
+      removeClearListener(sessionId, onClear);
     });
 
     // Keep stream open

@@ -54,6 +54,37 @@ describe("GET /api/sessions/:id", () => {
   });
 });
 
+describe("DELETE /api/sessions/:id/requests", () => {
+  afterEach(() => clearSessions());
+
+  it("removes captured requests so a later read is empty", async () => {
+    const app = buildApp();
+    const { id } = (await (await app.request("/api/sessions", { method: "POST" })).json()) as {
+      id: string;
+    };
+
+    await app.request(`/w/${id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ hello: "world" }),
+    });
+
+    const cleared = await app.request(`/api/sessions/${id}/requests`, { method: "DELETE" });
+    assert.equal(cleared.status, 200);
+
+    const session = (await (await app.request(`/api/sessions/${id}`)).json()) as {
+      requests: unknown[];
+    };
+    assert.deepEqual(session.requests, []);
+  });
+
+  it("returns 404 for an unknown session", async () => {
+    const app = buildApp();
+    const res = await app.request("/api/sessions/does-not-exist/requests", { method: "DELETE" });
+    assert.equal(res.status, 404);
+  });
+});
+
 describe("ANY /w/:id", () => {
   afterEach(() => clearSessions());
 

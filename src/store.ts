@@ -15,6 +15,7 @@ const cleanupInterval = setInterval(() => {
   for (const [id, session] of sessions) {
     if (now - session.createdAt > SESSION_TTL_MS) {
       session.listeners.clear();
+      session.clearListeners.clear();
       sessions.delete(id);
     }
   }
@@ -27,6 +28,7 @@ export function stopCleanup(): void {
 export function clearSessions(): void {
   for (const session of sessions.values()) {
     session.listeners.clear();
+    session.clearListeners.clear();
   }
   sessions.clear();
 }
@@ -36,7 +38,9 @@ export function createSession(): Session {
     // Remove oldest session
     const oldest = sessions.keys().next().value;
     if (oldest) {
-      sessions.get(oldest)?.listeners.clear();
+      const evicted = sessions.get(oldest);
+      evicted?.listeners.clear();
+      evicted?.clearListeners.clear();
       sessions.delete(oldest);
     }
   }
@@ -47,6 +51,7 @@ export function createSession(): Session {
     createdAt: Date.now(),
     requests: [],
     listeners: new Set(),
+    clearListeners: new Set(),
   };
   sessions.set(id, session);
   return session;
@@ -101,5 +106,30 @@ export function removeListener(sessionId: string, listener: (data: CapturedReque
   const session = sessions.get(sessionId);
   if (session) {
     session.listeners.delete(listener);
+  }
+}
+
+export function clearRequests(sessionId: string): boolean {
+  const session = sessions.get(sessionId);
+  if (!session) return false;
+
+  session.requests.length = 0;
+  for (const listener of [...session.clearListeners]) {
+    listener();
+  }
+  return true;
+}
+
+export function addClearListener(sessionId: string, listener: () => void | Promise<void>): boolean {
+  const session = sessions.get(sessionId);
+  if (!session) return false;
+  session.clearListeners.add(listener);
+  return true;
+}
+
+export function removeClearListener(sessionId: string, listener: () => void | Promise<void>): void {
+  const session = sessions.get(sessionId);
+  if (session) {
+    session.clearListeners.delete(listener);
   }
 }

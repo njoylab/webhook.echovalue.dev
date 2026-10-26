@@ -178,27 +178,45 @@
       if (collapsible) collapsible.style.display = "none";
     });
 
-    // Clear history button
-    document.getElementById("clear-btn").addEventListener("click", () => {
+    function resetInspector() {
       requests = [];
       selectedId = null;
       hasReceivedFirstRequest = false;
 
-      // Reset sidebar
       const list = document.getElementById("request-list-sidebar");
+      if (!list) return;
       list.innerHTML = `
         <div class="sidebar-empty" id="sidebar-empty">
           <div class="sidebar-empty-icon">&#9678;</div>
           <p>Waiting for requests...</p>
         </div>
       `;
-      document.getElementById("request-count").textContent = "0";
+      const countEl = document.getElementById("request-count");
+      if (countEl) countEl.textContent = "0";
 
-      // Reset detail panel to empty state
-      document.getElementById("detail-empty-content").style.display = "block";
-      document.getElementById("detail-request-content").style.display = "none";
-      document.getElementById("detail-request-content").innerHTML = "";
-      document.getElementById("detail-info-collapsible").style.display = "none";
+      const emptyContent = document.getElementById("detail-empty-content");
+      if (emptyContent) emptyContent.style.display = "block";
+      const requestContent = document.getElementById("detail-request-content");
+      if (requestContent) {
+        requestContent.style.display = "none";
+        requestContent.innerHTML = "";
+      }
+      const collapsible = document.getElementById("detail-info-collapsible");
+      if (collapsible) collapsible.style.display = "none";
+    }
+
+    document.getElementById("clear-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("clear-btn");
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}/requests`, { method: "DELETE" });
+        if (!res.ok) return;
+        resetInspector();
+      } catch {
+        // Keep the list when the server did not clear it.
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     // SSE connection
@@ -218,6 +236,10 @@
       } catch {
         // skip malformed
       }
+    });
+
+    eventSource.addEventListener("cleared", () => {
+      resetInspector();
     });
 
     eventSource.addEventListener("error", () => {
@@ -442,11 +464,11 @@
   function renderFooter() {
     return `
       <footer class="site-footer">
-        <span>Built by <a href="https://njoylab.com" class="footer-brand" target="_blank" rel="noopener">nJoyLab.com</a></span>
+        <span>Built by <a href="https://njoylab.com" class="footer-brand" target="_blank" rel="noopener noreferrer">nJoyLab.com</a></span>
         <span class="footer-sep">·</span>
-        <a href="https://www.echovalue.dev/" target="_blank" rel="noopener">More Tools</a>
+        <a href="https://www.echovalue.dev/" target="_blank" rel="noopener noreferrer">More Tools</a>
         <span class="footer-sep">·</span>
-        <a href="https://github.com/njoylab/webhook.echovalue.dev" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/njoylab/webhook.echovalue.dev" target="_blank" rel="noopener noreferrer">GitHub</a>
         <span class="footer-sep">·</span>
         <a href="/terms">Terms &amp; Conditions</a>
       </footer>
